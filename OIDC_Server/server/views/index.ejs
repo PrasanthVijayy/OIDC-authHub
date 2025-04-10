@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .form-container {
+        background: #fff;
+        padding: 30px;
+        margin: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+        text-align: left;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 5px;
+        color: #555;
+      }
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+      .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 14px;
+        color: #777;
+      }
+      .error-message {
+        color: red;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>OIDC Client Login</h1>
+    <div class="form-container">
+      <!-- Login form with username and password -->
+      <form action="/interaction/<%= uid %>/login" method="POST" id="loginForm">
+        <div class="form-group">
+          <label for="username">Email:</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            placeholder="abc@domain.com"
+          />
+        </div>
+        <div class="form-group">
+          <label for="password">Password:</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            placeholder="Password"
+          />
+        </div>
+        <button class="btn" type="submit">Login</button>
+
+        <% if (typeof error !== 'undefined') { %>
+        <p class="error-message"><%= error %></p>
+        <% } %>
+      </form>
+    </div>
+    <div class="footer"></div>
+
+    <!-- <script>
+      // Clear error message when user starts typing
+      function clearError() {
+        const errorMessage = document.querySelector(".error-message");
+        if (errorMessage) {
+          errorMessage.style.display = "none";
+        }
+      }
+
+      // Ensure error message is hidden after form is resubmitted
+      const form = document.getElementById("loginForm");
+      form.addEventListener("submit", function () {
+        const errorMessage = document.querySelector(".error-message");
+        if (errorMessage) {
+          errorMessage.style.display = "none"; // Hide error on form submit
+        }
+      });
+    </script> -->
+    <script>
+      const SYMMETRIC_KEY = "12345678901234567890123456789012"; // 32-byte key (same in backend)
+
+      async function encryptData(data) {
+        const encoder = new TextEncoder();
+        const keyBuffer = new TextEncoder().encode(SYMMETRIC_KEY);
+
+        const key = await window.crypto.subtle.importKey(
+          "raw",
+          keyBuffer,
+          { name: "AES-GCM" },
+          false,
+          ["encrypt"]
+        );
+
+        const iv = window.crypto.getRandomValues(new Uint8Array(12)); // Generate IV
+        const encryptedBuffer = await window.crypto.subtle.encrypt(
+          { name: "AES-GCM", iv },
+          key,
+          encoder.encode(data)
+        );
+
+        // Convert buffer to Uint8Array to extract auth tag (last 16 bytes in AES-GCM)
+        const encryptedBytes = new Uint8Array(encryptedBuffer);
+        const ciphertext = encryptedBytes.slice(0, -16);
+        const authTag = encryptedBytes.slice(-16);
+
+        return (
+          btoa(String.fromCharCode(...iv)) +
+          ":" +
+          btoa(String.fromCharCode(...ciphertext)) +
+          ":" +
+          btoa(String.fromCharCode(...authTag))
+        );
+      }
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          const encryptedUsername = await encryptData(username);
+          const encryptedPassword = await encryptData(password);
+
+          const form = document.createElement("form");
+          form.method = "POST";
+          form.action = "/interaction/<%= uid %>/login";
+
+          form.appendChild(
+            Object.assign(document.createElement("input"), {
+              type: "hidden",
+              name: "encryptedUsername",
+              value: encryptedUsername,
+            })
+          );
+          form.appendChild(
+            Object.assign(document.createElement("input"), {
+              type: "hidden",
+              name: "encryptedPassword",
+              value: encryptedPassword,
+            })
+          );
+
+          document.body.appendChild(form);
+          form.submit();
+        });
+    </script>
+  </body>
+</html>

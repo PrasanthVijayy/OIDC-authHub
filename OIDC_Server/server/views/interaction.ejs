@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Confirmation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 50px;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 20px;
+      }
+      .form-container {
+        background: #fff;
+        padding: 30px;
+        margin: auto;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 400px;
+      }
+      .client-logo {
+        margin-bottom: 20px;
+      }
+      .client-logo img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 5px;
+      }
+      ul {
+        text-align: left;
+        padding: 0;
+        margin: 20px 0;
+      }
+      li {
+        margin-bottom: 10px;
+      }
+      .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+      }
+      .btn:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Authorization Confirmation</h1>
+    <div class="form-container">
+      <!-- Authorization details -->
+      <ul>
+        <% if ([details.missingOIDCScope, details.missingOIDCClaims,
+        details.missingResourceScopes, details.rar].filter(Boolean).length ===
+        0) { %>
+        <li>
+          The client is asking you to confirm previously given authorization.
+        </li>
+        <% } %> <% missingOIDCScope = new Set(details.missingOIDCScope);
+        missingOIDCScope.delete('openid');
+        missingOIDCScope.delete('offline_access'); %> <% if
+        (missingOIDCScope.size) { %>
+        <li><strong>Scopes:</strong></li>
+        <ul>
+          <% missingOIDCScope.forEach((scope) => { %>
+          <li><%= scope %></li>
+          <% }) %>
+        </ul>
+        <% } %> <% missingOIDCClaims = new Set(details.missingOIDCClaims);
+        ['sub', 'sid', 'auth_time', 'acr', 'amr',
+        'iss'].forEach(Set.prototype.delete.bind(missingOIDCClaims)); %> <% if
+        (missingOIDCClaims.size) { %>
+        <li><strong>Claims:</strong></li>
+        <ul>
+          <% missingOIDCClaims.forEach((claim) => { %>
+          <li><%= claim %></li>
+          <% }) %>
+        </ul>
+        <% } %> <% if (details.missingResourceScopes) { %> <% for (const
+        [indicator, scopes] of Object.entries(details.missingResourceScopes)) {
+        %>
+        <li><strong><%= indicator %>:</strong></li>
+        <ul>
+          <% scopes.forEach((scope) => { %>
+          <li><%= scope %></li>
+          <% }) %>
+        </ul>
+        <% } %> <% } %> <% if (details.rar) { %>
+        <li><strong>Authorization Details:</strong></li>
+        <ul>
+          <% for (const { type, ...detail } of details.rar) { %>
+          <li>
+            <pre><%= JSON.stringify({ type, ...detail }, null, 4) %></pre>
+          </li>
+          <% } %>
+        </ul>
+        <% } %> <% if (params.scope && params.scope.includes('offline_access'))
+        { %>
+        <li>
+          The client is asking to have offline access to this authorization. <%
+          if ((!details.missingOIDCScope) ||
+          !details.missingOIDCScope.includes('offline_access')) { %> (which
+          you've previously granted) <% } %>
+        </li>
+        <% } %>
+      </ul>
+
+      <!-- Confirmation form -->
+      <form
+        id="confirmation-form"
+        autocomplete="off"
+        action="/interaction/<%= uid %>/confirm"
+        method="POST"
+      >
+        <button class="btn" type="submit">Continue</button>
+      </form>
+    </div>
+
+    <script>
+      // Automatically submit the form on page load
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("confirmation-form");
+        setTimeout(function () {
+          form.submit();
+        }, 1);
+      });
+    </script>
+  </body>
+</html>

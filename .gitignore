@@ -1,0 +1,7 @@
+**/Certificates
+**/node_modules
+**/package-lock.json
+**/.env
+**/docs
+**/logs
+**/Nginx_documents

@@ -1,0 +1,49 @@
+{
+  "name": "oidc-authhub",
+  "version": "1.0.0",
+  "description": "An OIDC application using Express.js, enabling secure user authentication with a custom-built Identity Provider (IDP) and integrating multiple Service Providers (SPs). The solution supports first-factor authentication, ensuring streamlined access management across connected services.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon server/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrasanthVijayy/OAUTH-PKCE-EXPRESS.git"
+  },
+  "keywords": [
+    "OAUTH",
+    "PKCE",
+    "EXPRESSJS",
+    "SP-INITIATED",
+    "SSO"
+  ],
+  "author": "Prasanth Vijayy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PrasanthVijayy/OIDC-AuthHub/issues"
+  },
+  "homepage": "https://github.com/PrasanthVijayy/OIDC-AuthHub.git#readme",
+  "dependencies": {
+    "activedirectory2": "^2.2.0",
+    "axios": "^1.7.9",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "helmet": "^8.0.0",
+    "hpp": "^0.2.3",
+    "jose": "^5.9.6",
+    "jsonwebtoken": "^9.0.2",
+    "logger": "^0.0.1",
+    "morgan": "^1.10.0",
+    "nanoid": "^5.0.9",
+    "node-cron": "^3.0.3",
+    "nodemon": "^3.1.9",
+    "oidc-provider": "^8.6.1",
+    "winston-daily-rotate-file": "^5.0.0"
+  }
+}
